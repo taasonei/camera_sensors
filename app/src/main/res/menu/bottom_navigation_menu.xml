@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/iso"
+        android:enabled="true"
+        android:icon="@drawable/ic_iso"
+        android:title="ISO"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/focus"
+        android:enabled="true"
+        android:icon="@drawable/ic_focus"
+        android:title="Focus"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/accelerometer"
+        android:enabled="true"
+        android:icon="@drawable/ic_accelerometer"
+        android:title="Accelerometer"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/coordinates"
+        android:enabled="true"
+        android:icon="@drawable/ic_coordinates"
+        android:title="Coordinates"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/approximation"
+        android:enabled="true"
+        android:icon="@drawable/ic_approximation"
+        android:title="Approximation"
+        app:showAsAction="ifRoom"/>
+
+</menu>
