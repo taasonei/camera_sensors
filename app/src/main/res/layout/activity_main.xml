@@ -7,12 +7,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".MainActivity">
 
-
-    <com.jjoe64.graphview.GraphView
-        android:id="@+id/graph"
-        android:layout_weight="9"
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chart"
         android:layout_width="match_parent"
-        android:layout_height="0dp" />
+        android:layout_height="match_parent"
+        android:layout_weight="9"/>
+
+
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
