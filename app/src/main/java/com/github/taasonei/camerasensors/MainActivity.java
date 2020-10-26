@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,8 +23,10 @@ public class MainActivity extends AppCompatActivity {
 
     private final Activity activity = this;
     private static final Random RANDOM = new Random();
-    private LineGraphSeries<DataPoint> series;
+    private LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
     private int lastX = 0;
+    private Viewport viewport;
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,14 +35,16 @@ public class MainActivity extends AppCompatActivity {
 
         final GraphView graph = (GraphView) findViewById(R.id.graph);
 
-        series = new LineGraphSeries<>();
         graph.addSeries(series);
 
-        Viewport viewport = graph.getViewport();
+        viewport = graph.getViewport();
         viewport.setYAxisBoundsManual(true);
         viewport.setMinY(0);
         viewport.setMaxY(10);
-        viewport.setScrollable(true);
+        // activate horizontal scrolling  enables horizontal scrolling
+       viewport.setScrollable(true);
+        // activate horizontal zooming and scrolling
+       //viewport.setScalable(true);
 
         BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
         bottomNavigation.setOnNavigationItemSelectedListener(
@@ -49,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
                         switch (item.getItemId()) {
                             case R.id.iso:
                                 graph.setVisibility(View.VISIBLE);
+
                                 break;
                             case R.id.focus:
                                 graph.setVisibility(View.INVISIBLE);
@@ -67,33 +73,45 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+        addRandomData();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 100; i++) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            addEntry();
-                        }
-                    });
-                    try {
-                        Thread.sleep(600);
-                    } catch (InterruptedException e) {
-
-                    }
-                }
-            }
-        }).start();
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                for (int i = 0; i < 15; i++) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            addEntry();
+//                        }
+//                    });
+//                    try {
+//                        Thread.sleep(600);
+//                    } catch (InterruptedException e) {
+//
+//                    }
+//                }
+//            }
+//        }).start();
+//    }
 
     private void addEntry() {
-        series.appendData(new DataPoint(lastX++, RANDOM.nextDouble() * 10d), true, 10);
+        series.appendData(new DataPoint(lastX++, RANDOM.nextDouble() * 10d), false, 22);
+       //viewport.scrollToEnd();
+    }
+
+    private void addRandomData() {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                series.appendData(new DataPoint(lastX++, RANDOM.nextInt(10)), false, 100);
+                addRandomData();
+            }
+        }, 1000);
     }
 }
