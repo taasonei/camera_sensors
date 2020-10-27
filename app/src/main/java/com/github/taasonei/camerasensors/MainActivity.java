@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         YAxis yl2 = chart.getAxisRight();
         yl2.setEnabled(false);
 
+        final int[] currentItem = {R.id.iso};
         showISO();
 
         BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
@@ -87,9 +88,14 @@ public class MainActivity extends AppCompatActivity {
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
                         switch (item.getItemId()) {
                             case R.id.iso:
-                                showISO();
+                                if (currentItem[0] != R.id.iso) {
+                                    clearChart();
+                                    currentItem[0] = R.id.iso;
+                                    showISO();
+                                }
                                 break;
                             case R.id.focus:
                                 showFocus();
@@ -155,6 +161,15 @@ public class MainActivity extends AppCompatActivity {
         // размер точек на графике
         set.setCircleSize(5f);
         // размер текста для полученных значений в dp
+        set.setValueTextSize(10f);
+        return set;
+    }
+
+    private LineDataSet createSet2() {
+        LineDataSet set = new LineDataSet(null, "");
+        set.setAxisDependency(YAxis.AxisDependency.RIGHT);
+        set.setLineWidth(3f);
+        set.setCircleSize(5f);
         set.setValueTextSize(10f);
         return set;
     }
@@ -232,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void clearChart() {
+        notify();
         // очищаем диаграмму data object = null
         chart.clear();
         chart.invalidate();
