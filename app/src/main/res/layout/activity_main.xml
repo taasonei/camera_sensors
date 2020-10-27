@@ -11,10 +11,8 @@
         android:id="@+id/chart"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="9"/>
-
-
-
+        android:layout_weight="9"
+        android:padding="3dp"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"

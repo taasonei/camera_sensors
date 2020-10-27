@@ -34,37 +34,53 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // присваиваем chart LineChart из activity+main.xml по id
         chart = findViewById(R.id.chart);
 
-        chart.setDescription("");
-        chart.setNoDataTextDescription("No data for the moment");
-        chart.setHighlightEnabled(true);
+        // разрешает сенсорные взаимодействия с графиком
         chart.setTouchEnabled(true);
+        // позволяет передвигать график
         chart.setDragEnabled(true);
+        // позволяет менять масштаб графика
         chart.setScaleEnabled(true);
+        // запрещает масштабировать оси по отдельности
         chart.setPinchZoom(true);
+
+        // описание в правом нижнем углу
+        chart.setDescription("ISO");
+        chart.setNoDataTextDescription("No data for the moment");
+        // цвет фона для графика
+        chart.setGridBackgroundColor(Color.WHITE);
+        // цвет фона вокруг графика
         chart.setBackgroundColor(Color.LTGRAY);
 
+        //chart.setMaxVisibleValueCount(10); //only when setDrawValues() is enabled
+
+        // создаем объект класса LineData, который устанавливает данные для линейной диаграммы
         LineData data = new LineData();
-        data.setValueTextColor(Color.WHITE);
+        // добавляем значения на график
         chart.setData(data);
 
-        Legend l = chart.getLegend();
-        l.setForm(Legend.LegendForm.LINE);
-        l.setTextColor(Color.WHITE);
+        // создаем объект класса Legend извлекая объект Legend из диаграммы с помощью getLegend()
+        Legend legend = chart.getLegend();
+        // задаем форму, которая будут отображать цвет графика напротив его названия
+        legend.setForm(Legend.LegendForm.CIRCLE);
 
-        XAxis xl = chart.getXAxis();
-        xl.setTextColor(Color.WHITE);
-        xl.setDrawAxisLine(false);
-        xl.setAvoidFirstLastClipping(true);
-
-        YAxis yl = chart.getAxisLeft();
-        yl.setTextColor(Color.WHITE);
-        yl.setAxisMaxValue(120f);
-        yl.setDrawGridLines(true);
+        // создаем объект класса XAxis,
+        // в котором сохраняются данные для того, что связано с горизонтальной осью
+        XAxis x = chart.getXAxis();
+        // отображаем значение x под графиком
+        x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        // задаем цвет значений х белым
+        x.setTextColor(Color.WHITE);
+        // не рисуем осевую линию
+        x.setDrawAxisLine(false);
+        x.setAvoidFirstLastClipping(true);
 
         YAxis yl2 = chart.getAxisRight();
         yl2.setEnabled(false);
+
+        showISO();
 
         BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
         bottomNavigation.setOnNavigationItemSelectedListener(
@@ -73,15 +89,19 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.iso:
-
+                                showISO();
                                 break;
                             case R.id.focus:
+                                showFocus();
                                 break;
                             case R.id.accelerometer:
+                                showAccelerometer();
                                 break;
                             case R.id.coordinates:
+                                showCoordinates();
                                 break;
                             case R.id.approximation:
+                                showApproximation();
                                 break;
                         }
                         return true;
@@ -90,35 +110,51 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+
     private void addEntry() {
         LineData data = chart.getData();
 
         if (data != null) {
+            // создаем объект класса LineDataSet,
+            // который представляет группу записей внутри 1й диаграммы
+            // присваемым ему значение по индексу 0 в списке объектов данных DataSet
             LineDataSet set = data.getDataSetByIndex(0);
             if (set == null) {
                 set = createSet();
                 data.addDataSet(set);
             }
-            data.addXValue(new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date()));
-            data.addEntry(new Entry((float) (Math.random() * 75) + 60f, set.getEntryCount()), 0);
+            // добавляем значение х текущие время и дату
+            data.addXValue(new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).
+                    format(new Date())
+            );
+            // добавляем значение y
+            data.addEntry(new Entry(
+                    //
+                    (float) (Math.random() * 10), set.getEntryCount()), 0);
+            // сообщаем, что данные обновились, чтобы обновить график
             chart.notifyDataSetChanged();
-            chart.setVisibleXRange(6);
-            chart.moveViewToX(data.getXValCount() - 7);
+            // устанавливаем максимальное количество видимых точек на графике - 5
+            chart.setVisibleXRange(4);
+            // перемещаем отображение графика на последнее добавленное значение
+            chart.moveViewToX(data.getXValCount() - 5);
         }
     }
 
     private LineDataSet createSet() {
-        LineDataSet set = new LineDataSet(null, "SPL Db");
-        set.setDrawCubic(true);
-        set.setCubicIntensity(0.2f);
+        // создаем объект класса LineDataSet
+        // список значение - null
+        // подпись графика - label
+        LineDataSet set = new LineDataSet(null, "ISO");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setColor(ColorTemplate.getHoloBlue());
-        set.setCircleColor(ColorTemplate.getHoloBlue());
-        set.setLineWidth(2f);
-        set.setCircleSize(4f);
-        set.setFillAlpha(65);
-        set.setHighLightColor(Color.rgb(244,117,177));
-        set.setValueTextColor(Color.WHITE);
+        // цвет линии графика
+        set.setColor(R.color.colorPrimary);
+        // цвет точек на графике
+        set.setCircleColor(R.color.colorPrimary);
+        // толщина линии графика
+        set.setLineWidth(3f);
+        // размер точек на графике
+        set.setCircleSize(5f);
+        // размер текста для полученных значений в dp
         set.setValueTextSize(10f);
         return set;
     }
@@ -138,12 +174,66 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                     try {
-                        Thread.sleep(600);
+                        Thread.sleep(2000);
                     } catch (InterruptedException e) {
 
                     }
                 }
             }
         }).start();
+    }
+
+    private void setYAxis(float minValue, float maxValue) {
+        // создаем объект класса YAxis,
+        // в котором сохраняются данные для того, что связано с вертикальной осью
+        // отображаем шкалу слева
+        YAxis y = chart.getAxisLeft();
+        // задаем цвет значений y белым
+        y.setTextColor(Color.WHITE);
+        // минимальное значение y
+        y.setAxisMinValue(minValue);
+        // максимальное значение y
+        y.setAxisMaxValue(maxValue);
+        // значение y начинается с минимального, а не с 0 по умолчанию
+        y.setStartAtZero(false);
+    }
+
+    private void showISO() {
+        chart.setDescription("ISO");
+        // 200 400 800 1600 3200
+        setYAxis(200f, 3200f);
+    }
+
+    private void showFocus() {
+        chart.setDescription("Focus");
+        setYAxis(0f, 1f);
+    }
+
+    private void showAccelerometer() {
+        chart.setDescription("Accelerometer");
+        setYAxis(0f, 100f);
+    }
+
+    private void showApproximation() {
+        chart.setDescription("Approximation");
+        setYAxis(0f, 1f);
+    }
+
+    private void showCoordinates() {
+        chart.setDescription("Coordinates");
+//        // широта
+//        setYAxis(47.220431f, 47.223050f);
+//        // долгота
+//        setYAxis(39.707823f, 39.712154f);
+
+
+
+        setYAxis(39.707823f, 47.223050f);
+    }
+
+    private void clearChart() {
+        // очищаем диаграмму data object = null
+        chart.clear();
+        chart.invalidate();
     }
 }
