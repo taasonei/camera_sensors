@@ -30,7 +30,9 @@ public class RandomGenerator {
 
     public float getIso() {
         float[] values = {200f, 400f, 800f, 1600f, 3200f};
-        return values[random.nextInt(values.length)];
+        float iso = values[random.nextInt(values.length)];
+        System.out.println(iso);
+        return iso;
     }
 
     public float getAccelerometer() {

@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
@@ -26,8 +27,11 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
 
     private final Activity activity = this;
-    private static final Random RANDOM = new Random();
+    private final RandomGenerator randomGenerator = new RandomGenerator();
     private LineChart chart;
+    private boolean isRunning = false;
+    private String label = "";
+    private int currentItem = R.id.iso;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +58,6 @@ public class MainActivity extends AppCompatActivity {
         // цвет фона вокруг графика
         chart.setBackgroundColor(Color.LTGRAY);
 
-        //chart.setMaxVisibleValueCount(10); //only when setDrawValues() is enabled
-
-        // создаем объект класса LineData, который устанавливает данные для линейной диаграммы
-        LineData data = new LineData();
-        // добавляем значения на график
-        chart.setData(data);
-
         // создаем объект класса Legend извлекая объект Legend из диаграммы с помощью getLegend()
         Legend legend = chart.getLegend();
         // задаем форму, которая будут отображать цвет графика напротив его названия
@@ -80,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         YAxis yl2 = chart.getAxisRight();
         yl2.setEnabled(false);
 
-        final int[] currentItem = {R.id.iso};
+
         showISO();
 
         BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
@@ -88,26 +85,41 @@ public class MainActivity extends AppCompatActivity {
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
                         switch (item.getItemId()) {
                             case R.id.iso:
-                                if (currentItem[0] != R.id.iso) {
+                                if (currentItem != R.id.iso) {
                                     clearChart();
-                                    currentItem[0] = R.id.iso;
+                                    currentItem = R.id.iso;
                                     showISO();
                                 }
                                 break;
                             case R.id.focus:
-                                showFocus();
+                                if (currentItem != R.id.focus) {
+                                    clearChart();
+                                    currentItem = R.id.focus;
+                                    showFocus();
+                                }
                                 break;
                             case R.id.accelerometer:
-                                showAccelerometer();
+                                if (currentItem != R.id.accelerometer) {
+                                    clearChart();
+                                    currentItem = R.id.accelerometer;
+                                    showAccelerometer();
+                                }
                                 break;
                             case R.id.coordinates:
-                                showCoordinates();
+                                if (currentItem != R.id.coordinates) {
+                                    clearChart();
+                                    currentItem = R.id.coordinates;
+                                    showCoordinates();
+                                }
                                 break;
                             case R.id.approximation:
-                                showApproximation();
+                                if (currentItem != R.id.approximation) {
+                                    clearChart();
+                                    currentItem = R.id.approximation;
+                                    showApproximation();
+                                }
                                 break;
                         }
                         return true;
@@ -116,17 +128,43 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isRunning) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (currentItem != R.id.coordinates) {
+                                addEntry();
+                            } else {
+                                add2Entry();
+                            }
+                        }
+                    });
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        Toast.makeText(activity, "Something went wrong", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        }).start();
+    }
 
     private void addEntry() {
         LineData data = chart.getData();
-
         if (data != null) {
             // создаем объект класса LineDataSet,
             // который представляет группу записей внутри 1й диаграммы
             // присваемым ему значение по индексу 0 в списке объектов данных DataSet
             LineDataSet set = data.getDataSetByIndex(0);
             if (set == null) {
-                set = createSet();
+                set = createSet(label);
                 data.addDataSet(set);
             }
             // добавляем значение х текущие время и дату
@@ -134,6 +172,24 @@ public class MainActivity extends AppCompatActivity {
                     format(new Date())
             );
             // добавляем значение y
+            switch (label) {
+                case "ISO":
+                    data.addEntry(
+                            new Entry(randomGenerator.getIso(),
+                                    set.getEntryCount()), 0);
+                    break;
+                case "Accelerometer":
+                    data.addEntry(
+                            new Entry(randomGenerator.getAccelerometer(),
+                                    set.getEntryCount()), 0);
+                    break;
+                case "Focus":
+                case "Approximation":
+                    data.addEntry(
+                            new Entry(randomGenerator.getZeroOneValue(),
+                                    set.getEntryCount()), 0);
+                    break;
+            }
             data.addEntry(new Entry(
                     //
                     (float) (Math.random() * 10), set.getEntryCount()), 0);
@@ -146,11 +202,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private LineDataSet createSet() {
+    private LineDataSet createSet(String label) {
         // создаем объект класса LineDataSet
         // список значение - null
         // подпись графика - label
-        LineDataSet set = new LineDataSet(null, "ISO");
+        LineDataSet set = new LineDataSet(null, label);
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         // цвет линии графика
         set.setColor(R.color.colorPrimary);
@@ -165,8 +221,41 @@ public class MainActivity extends AppCompatActivity {
         return set;
     }
 
-    private LineDataSet createSet2() {
-        LineDataSet set = new LineDataSet(null, "");
+    private void add2Entry() {
+        LineData data = chart.getData();
+        if (data != null) {
+            LineDataSet set1 = data.getDataSetByIndex(0);
+            LineDataSet set2 = data.getDataSetByIndex(0);
+            if (set1 == null) {
+                set1 = createSet(label);
+                data.addDataSet(set1);
+            }
+            if (set2 == null) {
+                set2 = createSet2("Longitude");
+            }
+            data.addXValue(new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).
+                    format(new Date())
+            );
+            // добавляем значение y
+            data.addEntry(
+                    new Entry(randomGenerator.getLatitude(),
+                            set1.getEntryCount()),
+                    0);
+            data.addEntry(
+                    new Entry(randomGenerator.getLongitude(),
+                            set2.getEntryCount()),
+                    0);
+            // сообщаем, что данные обновились, чтобы обновить график
+            chart.notifyDataSetChanged();
+            // устанавливаем максимальное количество видимых точек на графике - 5
+            chart.setVisibleXRange(4);
+            // перемещаем отображение графика на последнее добавленное значение
+            chart.moveViewToX(data.getXValCount() - 5);
+        }
+    }
+
+    private LineDataSet createSet2(String label) {
+        LineDataSet set = new LineDataSet(null, label);
         set.setAxisDependency(YAxis.AxisDependency.RIGHT);
         set.setLineWidth(3f);
         set.setCircleSize(5f);
@@ -174,29 +263,6 @@ public class MainActivity extends AppCompatActivity {
         return set;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 100; i++) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            addEntry();
-                        }
-                    });
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-
-                    }
-                }
-            }
-        }).start();
-    }
 
     private void setYAxis(float minValue, float maxValue) {
         // создаем объект класса YAxis,
@@ -213,43 +279,67 @@ public class MainActivity extends AppCompatActivity {
         y.setStartAtZero(false);
     }
 
-    private void showISO() {
-        chart.setDescription("ISO");
-        // 200 400 800 1600 3200
+    synchronized private void showISO() {
+        // создаем объект класса LineData, который устанавливает данные для линейной диаграммы
+        LineData data = new LineData();
+        // добавляем значения на график
+        chart.setData(data);
+        label = "ISO";
+        chart.setDescription(label);
         setYAxis(200f, 3200f);
+        isRunning = true;
+        notifyAll();
     }
 
-    private void showFocus() {
-        chart.setDescription("Focus");
+    synchronized private void showFocus() {
+        createLineData();
+        label = "Focus";
+        chart.setDescription(label);
         setYAxis(0f, 1f);
+        isRunning = true;
+        notifyAll();
     }
 
-    private void showAccelerometer() {
-        chart.setDescription("Accelerometer");
+    synchronized private void showAccelerometer() {
+        createLineData();
+        label = "Accelerometer";
+        chart.setDescription(label);
         setYAxis(0f, 100f);
+        isRunning = true;
+        notifyAll();
     }
 
-    private void showApproximation() {
-        chart.setDescription("Approximation");
+    synchronized private void showApproximation() {
+        createLineData();
+        label = "Approximation";
+        chart.setDescription(label);
         setYAxis(0f, 1f);
+        isRunning = true;
+        notifyAll();
     }
 
-    private void showCoordinates() {
+    synchronized private void showCoordinates() {
+        createLineData();
+        label = "Longitude";
         chart.setDescription("Coordinates");
-//        // широта
-//        setYAxis(47.220431f, 47.223050f);
-//        // долгота
-//        setYAxis(39.707823f, 39.712154f);
-
-
-
+        // широта 47.220431f, 47.223050f);
+        // долгота 39.707823f, 39.712154f);
         setYAxis(39.707823f, 47.223050f);
     }
 
-    private void clearChart() {
-        notify();
+    synchronized private void clearChart() {
+        isRunning = false;
+        notifyAll();
         // очищаем диаграмму data object = null
+        chart.clearValues();
         chart.clear();
         chart.invalidate();
+    }
+
+    private void createLineData() {
+        // создаем объект класса LineData, который устанавливает данные для линейной диаграммы
+        LineData data = new LineData();
+        // добавляем значения на график
+        chart.setData(data);
     }
 }
