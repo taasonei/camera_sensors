@@ -20,7 +20,9 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -47,8 +49,6 @@ public class MainActivity extends AppCompatActivity {
         chart.setDragEnabled(true);
         // позволяет менять масштаб графика
         chart.setScaleEnabled(true);
-        // запрещает масштабировать оси по отдельности
-        chart.setPinchZoom(true);
 
         // описание в правом нижнем углу
         chart.setDescription("ISO");
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         YAxis yl2 = chart.getAxisRight();
         yl2.setEnabled(false);
 
+     
 
         showISO();
 
@@ -88,35 +89,30 @@ public class MainActivity extends AppCompatActivity {
                         switch (item.getItemId()) {
                             case R.id.iso:
                                 if (currentItem != R.id.iso) {
-                                    clearChart();
                                     currentItem = R.id.iso;
                                     showISO();
                                 }
                                 break;
                             case R.id.focus:
                                 if (currentItem != R.id.focus) {
-                                    clearChart();
                                     currentItem = R.id.focus;
                                     showFocus();
                                 }
                                 break;
                             case R.id.accelerometer:
                                 if (currentItem != R.id.accelerometer) {
-                                    clearChart();
                                     currentItem = R.id.accelerometer;
                                     showAccelerometer();
                                 }
                                 break;
                             case R.id.coordinates:
                                 if (currentItem != R.id.coordinates) {
-                                    clearChart();
                                     currentItem = R.id.coordinates;
                                     showCoordinates();
                                 }
                                 break;
                             case R.id.approximation:
                                 if (currentItem != R.id.approximation) {
-                                    clearChart();
                                     currentItem = R.id.approximation;
                                     showApproximation();
                                 }
@@ -190,15 +186,10 @@ public class MainActivity extends AppCompatActivity {
                                     set.getEntryCount()), 0);
                     break;
             }
-            data.addEntry(new Entry(
-                    //
-                    (float) (Math.random() * 10), set.getEntryCount()), 0);
             // сообщаем, что данные обновились, чтобы обновить график
             chart.notifyDataSetChanged();
-            // устанавливаем максимальное количество видимых точек на графике - 5
-            chart.setVisibleXRange(4);
             // перемещаем отображение графика на последнее добавленное значение
-            chart.moveViewToX(data.getXValCount() - 5);
+            //chart.moveViewToX(chart.getXChartMax());
         }
     }
 
@@ -223,15 +214,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void add2Entry() {
         LineData data = chart.getData();
+
         if (data != null) {
             LineDataSet set1 = data.getDataSetByIndex(0);
-            LineDataSet set2 = data.getDataSetByIndex(0);
+            LineDataSet set2 = data.getDataSetByIndex(1);
             if (set1 == null) {
                 set1 = createSet(label);
                 data.addDataSet(set1);
             }
             if (set2 == null) {
                 set2 = createSet2("Longitude");
+                data.addDataSet(set2);
             }
             data.addXValue(new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).
                     format(new Date())
@@ -244,19 +237,17 @@ public class MainActivity extends AppCompatActivity {
             data.addEntry(
                     new Entry(randomGenerator.getLongitude(),
                             set2.getEntryCount()),
-                    0);
+                    1);
             // сообщаем, что данные обновились, чтобы обновить график
             chart.notifyDataSetChanged();
-            // устанавливаем максимальное количество видимых точек на графике - 5
-            chart.setVisibleXRange(4);
             // перемещаем отображение графика на последнее добавленное значение
-            chart.moveViewToX(data.getXValCount() - 5);
+            chart.moveViewToX(chart.getXChartMax());
         }
     }
 
     private LineDataSet createSet2(String label) {
         LineDataSet set = new LineDataSet(null, label);
-        set.setAxisDependency(YAxis.AxisDependency.RIGHT);
+        set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setLineWidth(3f);
         set.setCircleSize(5f);
         set.setValueTextSize(10f);
@@ -280,58 +271,61 @@ public class MainActivity extends AppCompatActivity {
     }
 
     synchronized private void showISO() {
-        // создаем объект класса LineData, который устанавливает данные для линейной диаграммы
-        LineData data = new LineData();
-        // добавляем значения на график
-        chart.setData(data);
+        clearChart();
+        createLineData();
         label = "ISO";
         chart.setDescription(label);
-        setYAxis(200f, 3200f);
+        setYAxis(200f, 3250f);
         isRunning = true;
         notifyAll();
     }
 
     synchronized private void showFocus() {
+        clearChart();
         createLineData();
         label = "Focus";
         chart.setDescription(label);
-        setYAxis(0f, 1f);
+        setYAxis(0f, 1.2f);
         isRunning = true;
         notifyAll();
     }
 
     synchronized private void showAccelerometer() {
+        clearChart();
         createLineData();
         label = "Accelerometer";
         chart.setDescription(label);
-        setYAxis(0f, 100f);
+        setYAxis(0f, 110f);
         isRunning = true;
         notifyAll();
     }
 
     synchronized private void showApproximation() {
+        clearChart();
         createLineData();
         label = "Approximation";
         chart.setDescription(label);
-        setYAxis(0f, 1f);
+        setYAxis(0f, 1.2f);
         isRunning = true;
         notifyAll();
     }
 
     synchronized private void showCoordinates() {
+        clearChart();
         createLineData();
-        label = "Longitude";
+        label = "Latitude";
         chart.setDescription("Coordinates");
         // широта 47.220431f, 47.223050f);
         // долгота 39.707823f, 39.712154f);
-        setYAxis(39.707823f, 47.223050f);
+        setYAxis(39.707823f, 47.3f);
+        isRunning = true;
+        notifyAll();
     }
 
     synchronized private void clearChart() {
         isRunning = false;
         notifyAll();
         // очищаем диаграмму data object = null
-        chart.clearValues();
         chart.clear();
         chart.invalidate();
     }
