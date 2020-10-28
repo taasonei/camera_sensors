@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private final Activity activity = this;
     private final RandomGenerator randomGenerator = new RandomGenerator();
     private LineChart chart;
+    private LineChart chart2;
     private boolean isRunning = false;
     private String label = "";
     private int currentItem = R.id.iso;
@@ -42,40 +44,56 @@ public class MainActivity extends AppCompatActivity {
 
         // присваиваем chart LineChart из activity+main.xml по id
         chart = findViewById(R.id.chart);
+        chart2 = findViewById(R.id.chart2);
+
 
         // разрешает сенсорные взаимодействия с графиком
         chart.setTouchEnabled(true);
+        chart2.setTouchEnabled(true);
         // позволяет передвигать график
         chart.setDragEnabled(true);
+        chart2.setDragEnabled(true);
         // позволяет менять масштаб графика
         chart.setScaleEnabled(true);
+        chart2.setScaleEnabled(true);
 
         // описание в правом нижнем углу
-        chart.setDescription("ISO");
         chart.setNoDataTextDescription("No data for the moment");
+        chart2.setNoDataTextDescription("No data for the moment");
         // цвет фона для графика
         chart.setGridBackgroundColor(Color.WHITE);
+        chart2.setGridBackgroundColor(Color.WHITE);
         // цвет фона вокруг графика
         chart.setBackgroundColor(Color.LTGRAY);
+        chart2.setBackgroundColor(Color.LTGRAY);
 
         // создаем объект класса Legend извлекая объект Legend из диаграммы с помощью getLegend()
         Legend legend = chart.getLegend();
+        Legend legend2 = chart2.getLegend();
         // задаем форму, которая будут отображать цвет графика напротив его названия
         legend.setForm(Legend.LegendForm.CIRCLE);
+        legend2.setForm(Legend.LegendForm.CIRCLE);
 
         // создаем объект класса XAxis,
         // в котором сохраняются данные для того, что связано с горизонтальной осью
         XAxis x = chart.getXAxis();
+        XAxis x2 = chart2.getXAxis();
         // отображаем значение x под графиком
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x2.setPosition(XAxis.XAxisPosition.BOTTOM);
         // задаем цвет значений х белым
         x.setTextColor(Color.WHITE);
+        x2.setTextColor(Color.WHITE);
         // не рисуем осевую линию
         x.setDrawAxisLine(false);
         x.setAvoidFirstLastClipping(true);
+        x2.setDrawAxisLine(false);
+        x2.setAvoidFirstLastClipping(true);
 
-        YAxis yl2 = chart.getAxisRight();
-        yl2.setEnabled(false);
+        YAxis y = chart.getAxisRight();
+        y.setEnabled(false);
+        YAxis y2 = chart2.getAxisRight();
+        y2.setEnabled(false);
 
      
 
@@ -90,30 +108,35 @@ public class MainActivity extends AppCompatActivity {
                             case R.id.iso:
                                 if (currentItem != R.id.iso) {
                                     currentItem = R.id.iso;
+                                    chart2.setVisibility(View.GONE);
                                     showISO();
                                 }
                                 break;
                             case R.id.focus:
                                 if (currentItem != R.id.focus) {
                                     currentItem = R.id.focus;
+                                    chart2.setVisibility(View.GONE);
                                     showFocus();
                                 }
                                 break;
                             case R.id.accelerometer:
                                 if (currentItem != R.id.accelerometer) {
                                     currentItem = R.id.accelerometer;
+                                    chart2.setVisibility(View.GONE);
                                     showAccelerometer();
                                 }
                                 break;
                             case R.id.coordinates:
                                 if (currentItem != R.id.coordinates) {
                                     currentItem = R.id.coordinates;
+                                    chart2.setVisibility(View.VISIBLE);
                                     showCoordinates();
                                 }
                                 break;
                             case R.id.approximation:
                                 if (currentItem != R.id.approximation) {
                                     currentItem = R.id.approximation;
+                                    chart2.setVisibility(View.GONE);
                                     showApproximation();
                                 }
                                 break;
@@ -189,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
             // сообщаем, что данные обновились, чтобы обновить график
             chart.notifyDataSetChanged();
             // перемещаем отображение графика на последнее добавленное значение
-            //chart.moveViewToX(chart.getXChartMax());
+            chart.moveViewToX(chart.getXChartMax());
         }
     }
 
@@ -214,34 +237,39 @@ public class MainActivity extends AppCompatActivity {
 
     private void add2Entry() {
         LineData data = chart.getData();
+        LineData data2 = chart2.getData();
+        String x = "";
 
-        if (data != null) {
+        if (data != null && data2 != null) {
             LineDataSet set1 = data.getDataSetByIndex(0);
-            LineDataSet set2 = data.getDataSetByIndex(1);
+            LineDataSet set2 = data2.getDataSetByIndex(0);
             if (set1 == null) {
                 set1 = createSet(label);
                 data.addDataSet(set1);
             }
             if (set2 == null) {
                 set2 = createSet2("Longitude");
-                data.addDataSet(set2);
+                data2.addDataSet(set2);
             }
-            data.addXValue(new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).
-                    format(new Date())
-            );
+            x = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).
+                    format(new Date());
+            data.addXValue(x);
+            data2.addXValue(x);
             // добавляем значение y
             data.addEntry(
                     new Entry(randomGenerator.getLatitude(),
                             set1.getEntryCount()),
                     0);
-            data.addEntry(
+            data2.addEntry(
                     new Entry(randomGenerator.getLongitude(),
                             set2.getEntryCount()),
-                    1);
+                    0);
             // сообщаем, что данные обновились, чтобы обновить график
             chart.notifyDataSetChanged();
+            chart2.notifyDataSetChanged();
             // перемещаем отображение графика на последнее добавленное значение
             chart.moveViewToX(chart.getXChartMax());
+            chart2.moveViewToX(chart2.getXChartMax());
         }
     }
 
@@ -270,6 +298,14 @@ public class MainActivity extends AppCompatActivity {
         y.setStartAtZero(false);
     }
 
+    private void setYAxis2(float minValue, float maxValue) {
+        YAxis y = chart2.getAxisLeft();
+        y.setTextColor(Color.WHITE);
+        y.setAxisMinValue(minValue);
+        y.setAxisMaxValue(maxValue);
+        y.setStartAtZero(false);
+    }
+
     synchronized private void showISO() {
         clearChart();
         createLineData();
@@ -285,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
         createLineData();
         label = "Focus";
         chart.setDescription(label);
-        setYAxis(0f, 1.2f);
+        setYAxis(0f, 1.05f);
         isRunning = true;
         notifyAll();
     }
@@ -295,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
         createLineData();
         label = "Accelerometer";
         chart.setDescription(label);
-        setYAxis(0f, 110f);
+        setYAxis(0f, 105f);
         isRunning = true;
         notifyAll();
     }
@@ -305,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
         createLineData();
         label = "Approximation";
         chart.setDescription(label);
-        setYAxis(0f, 1.2f);
+        setYAxis(0f, 1.05f);
         isRunning = true;
         notifyAll();
     }
@@ -313,11 +349,13 @@ public class MainActivity extends AppCompatActivity {
     synchronized private void showCoordinates() {
         clearChart();
         createLineData();
+        createLineData2();
         label = "Latitude";
         chart.setDescription("Coordinates");
         // широта 47.220431f, 47.223050f);
         // долгота 39.707823f, 39.712154f);
-        setYAxis(39.707823f, 47.3f);
+        setYAxis(47.220431f, 47.224f);
+        setYAxis2(39.707823f, 39.72f);
         isRunning = true;
         notifyAll();
     }
@@ -328,6 +366,10 @@ public class MainActivity extends AppCompatActivity {
         // очищаем диаграмму data object = null
         chart.clear();
         chart.invalidate();
+        if(chart2 != null) {
+            chart2.clear();
+            chart2.invalidate();
+        }
     }
 
     private void createLineData() {
@@ -335,5 +377,10 @@ public class MainActivity extends AppCompatActivity {
         LineData data = new LineData();
         // добавляем значения на график
         chart.setData(data);
+    }
+
+    private void createLineData2() {
+        LineData data = new LineData();
+        chart2.setData(data);
     }
 }
