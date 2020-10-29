@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Camera Sensors</string>
+    <string name="iso">ISO</string>
+    <string name="focus">Focus</string>
+    <string name="accelerometer">Accelerometer</string>
+    <string name="coordinates">Coordinates</string>
+    <string name="approximation">Approximation</string>
 </resources>

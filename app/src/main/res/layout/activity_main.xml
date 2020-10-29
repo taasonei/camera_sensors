@@ -14,7 +14,6 @@
         android:layout_weight="1"
         android:padding="30dp"/>
 
-
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart2"
         android:layout_width="match_parent"
@@ -31,6 +30,5 @@
         app:itemTextColor="@color/white"
         app:itemIconTint="@color/white"
         app:menu="@menu/bottom_navigation_menu"/>
-
 
 </LinearLayout>

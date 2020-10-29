@@ -33,9 +33,33 @@ public class MainActivity extends AppCompatActivity {
     private final RandomGenerator randomGenerator = new RandomGenerator();
     private LineChart chart;
     private LineChart chart2;
+    private int currentItem = R.id.iso;
+
     private boolean isRunning = false;
     private String label = "";
-    private int currentItem = R.id.iso;
+
+    private final String isoLabel = "ISO";
+    private final float isoMin = 200f;
+    private final float isoMax = 3250f;
+
+    private final String focusLabel = "Focus";
+    private final String approximationLabel = "Approximation";
+    private final float minSensorValue = 0f;
+    private final float maxSensorValue = 1.05f;
+
+    private final String accelerometerLabel = "Accelerometer";
+    private float accelerometerMin = 0f;
+    private float accelerometerMax = 105;
+
+    private final String longitudeLabel = "Longitude";
+    private final float longitudeMin = 39.707823f;
+    private final float longitudeMax = 39.713154f;
+
+    private final String latitudeLabel = "Latitude";
+    private final float latitudeMin = 47.220431f;
+    private final float latitudeMax = 47.224050f;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         // присваиваем chart LineChart из activity+main.xml по id
         chart = findViewById(R.id.chart);
         chart2 = findViewById(R.id.chart2);
-
 
         // разрешает сенсорные взаимодействия с графиком
         chart.setTouchEnabled(true);
@@ -95,9 +118,7 @@ public class MainActivity extends AppCompatActivity {
         YAxis y2 = chart2.getAxisRight();
         y2.setEnabled(false);
 
-     
-
-        showISO();
+        showChart(isoLabel, isoMin, isoMax);
 
         BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
         bottomNavigation.setOnNavigationItemSelectedListener(
@@ -109,35 +130,35 @@ public class MainActivity extends AppCompatActivity {
                                 if (currentItem != R.id.iso) {
                                     currentItem = R.id.iso;
                                     chart2.setVisibility(View.GONE);
-                                    showISO();
+                                    showChart(isoLabel, isoMin, isoMax);
                                 }
                                 break;
                             case R.id.focus:
                                 if (currentItem != R.id.focus) {
                                     currentItem = R.id.focus;
                                     chart2.setVisibility(View.GONE);
-                                    showFocus();
+                                    showChart(focusLabel, minSensorValue, maxSensorValue);
                                 }
                                 break;
                             case R.id.accelerometer:
                                 if (currentItem != R.id.accelerometer) {
                                     currentItem = R.id.accelerometer;
                                     chart2.setVisibility(View.GONE);
-                                    showAccelerometer();
+                                    showChart(accelerometerLabel, accelerometerMin, accelerometerMax);
                                 }
                                 break;
                             case R.id.coordinates:
                                 if (currentItem != R.id.coordinates) {
                                     currentItem = R.id.coordinates;
                                     chart2.setVisibility(View.VISIBLE);
-                                    showCoordinates();
+                                    showChart(latitudeLabel, latitudeMin, latitudeMax, longitudeMin, longitudeMax);
                                 }
                                 break;
                             case R.id.approximation:
                                 if (currentItem != R.id.approximation) {
                                     currentItem = R.id.approximation;
                                     chart2.setVisibility(View.GONE);
-                                    showApproximation();
+                                    showChart(approximationLabel, minSensorValue, maxSensorValue);
                                 }
                                 break;
                         }
@@ -150,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -216,29 +236,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private LineDataSet createSet(String label) {
-        // создаем объект класса LineDataSet
-        // список значение - null
-        // подпись графика - label
-        LineDataSet set = new LineDataSet(null, label);
-        set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        // цвет линии графика
-        set.setColor(R.color.colorPrimary);
-        // цвет точек на графике
-        set.setCircleColor(R.color.colorPrimary);
-        // толщина линии графика
-        set.setLineWidth(3f);
-        // размер точек на графике
-        set.setCircleSize(5f);
-        // размер текста для полученных значений в dp
-        set.setValueTextSize(10f);
-        return set;
-    }
-
     private void add2Entry() {
         LineData data = chart.getData();
         LineData data2 = chart2.getData();
-        String x = "";
+        String x;
 
         if (data != null && data2 != null) {
             LineDataSet set1 = data.getDataSetByIndex(0);
@@ -248,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
                 data.addDataSet(set1);
             }
             if (set2 == null) {
-                set2 = createSet2("Longitude");
+                set2 = createSet2(longitudeLabel);
                 data2.addDataSet(set2);
             }
             x = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).
@@ -273,6 +274,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private LineDataSet createSet(String label) {
+        // создаем объект класса LineDataSet, список значение - null, подпись графика - label
+        LineDataSet set = new LineDataSet(null, label);
+        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+        // цвет линии графика
+        set.setColor(R.color.colorPrimary);
+        // цвет точек на графике
+        set.setCircleColor(R.color.colorPrimary);
+        // толщина линии графика
+        set.setLineWidth(3f);
+        // размер точек на графике
+        set.setCircleSize(5f);
+        // размер текста для полученных значений в dp
+        set.setValueTextSize(10f);
+        return set;
+    }
+
     private LineDataSet createSet2(String label) {
         LineDataSet set = new LineDataSet(null, label);
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -281,7 +299,6 @@ public class MainActivity extends AppCompatActivity {
         set.setValueTextSize(10f);
         return set;
     }
-
 
     private void setYAxis(float minValue, float maxValue) {
         // создаем объект класса YAxis,
@@ -306,56 +323,24 @@ public class MainActivity extends AppCompatActivity {
         y.setStartAtZero(false);
     }
 
-    synchronized private void showISO() {
+    synchronized private void showChart(String chartLabel, float min, float max) {
         clearChart();
         createLineData();
-        label = "ISO";
+        label = chartLabel;
         chart.setDescription(label);
-        setYAxis(200f, 3250f);
+        setYAxis(min, max);
         isRunning = true;
         notifyAll();
     }
 
-    synchronized private void showFocus() {
-        clearChart();
-        createLineData();
-        label = "Focus";
-        chart.setDescription(label);
-        setYAxis(0f, 1.05f);
-        isRunning = true;
-        notifyAll();
-    }
-
-    synchronized private void showAccelerometer() {
-        clearChart();
-        createLineData();
-        label = "Accelerometer";
-        chart.setDescription(label);
-        setYAxis(0f, 105f);
-        isRunning = true;
-        notifyAll();
-    }
-
-    synchronized private void showApproximation() {
-        clearChart();
-        createLineData();
-        label = "Approximation";
-        chart.setDescription(label);
-        setYAxis(0f, 1.05f);
-        isRunning = true;
-        notifyAll();
-    }
-
-    synchronized private void showCoordinates() {
+    synchronized private void showChart(String label1, float min1, float max1, float min2, float max2) {
         clearChart();
         createLineData();
         createLineData2();
-        label = "Latitude";
+        label = label1;
         chart.setDescription("Coordinates");
-        // широта 47.220431f, 47.223050f);
-        // долгота 39.707823f, 39.712154f);
-        setYAxis(47.220431f, 47.224f);
-        setYAxis2(39.707823f, 39.72f);
+        setYAxis(min1, max1);
+        setYAxis2(min2, max2);
         isRunning = true;
         notifyAll();
     }

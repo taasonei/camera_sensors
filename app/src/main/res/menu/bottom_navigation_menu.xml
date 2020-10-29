@@ -6,35 +6,35 @@
         android:id="@+id/iso"
         android:enabled="true"
         android:icon="@drawable/ic_iso"
-        android:title="ISO"
+        android:title="@string/iso"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/focus"
         android:enabled="true"
         android:icon="@drawable/ic_focus"
-        android:title="Focus"
+        android:title="@string/focus"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/accelerometer"
         android:enabled="true"
         android:icon="@drawable/ic_accelerometer"
-        android:title="Accelerometer"
+        android:title="@string/accelerometer"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/coordinates"
         android:enabled="true"
         android:icon="@drawable/ic_coordinates"
-        android:title="Coordinates"
+        android:title="@string/coordinates"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/approximation"
         android:enabled="true"
         android:icon="@drawable/ic_approximation"
-        android:title="Approximation"
+        android:title="@string/approximation"
         app:showAsAction="ifRoom"/>
 
 </menu>
